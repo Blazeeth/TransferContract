@@ -1,2 +1,2 @@
 # TransferContract
-Basic Money Transfer Smart Contract
+Basic Money Transfer and Balance Checking Contract
