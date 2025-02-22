@@ -1,2 +1,2 @@
 # TransferContract
-Basic Money Transfer and Balance Checking Contract
+Basic Crypto Transfer and Balance Checking Contract
