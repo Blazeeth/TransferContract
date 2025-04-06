@@ -1,30 +1,40 @@
-// SPDX-License-Identifier: GPL-3.0
-pragma solidity ^0.8.28;
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.20;
 
-contract Transfer{
+interface IERC20 {
+    function transfer(address recipient, uint256 amount) external returns (bool);
+}
 
-    mapping (address=> uint) balance;
-    function addbalance(uint _toadd)public returns(uint){
-        balance[msg.sender] += _toadd;
-        return balance[msg.sender];  }
-    
+contract TokenAirdrop {
+    address public owner;
 
-    function getbalance()public view returns(uint){
-        return balance[msg.sender]; }
+    // Event to log successful airdrops
+    event TokensAirdropped(address indexed token, address indexed recipient, uint256 amount);
 
-    
-    function transfer(address recipent, uint amount)public {
-        require(balance[msg.sender]>= amount,"Balance not Sufficient");
-        require(msg.sender != recipent);
+    constructor() {
+        owner = msg.sender;
+    }
 
-        uint prebalance = balance[msg.sender];
+    modifier onlyOwner() {
+        require(msg.sender == owner, "Not the owner");
+        _;
+    }
 
-        _transfer(msg.sender, recipent, amount);
-        assert(balance[msg.sender] == prebalance - amount); } 
-    
-     function _transfer(address from, address to, uint amount)private {
-        balance[from] -= amount;
-        balance[to] += amount;   } 
-            
+    // Function to airdrop tokens to multiple recipients
+    function airdropTokens(address token, address[] memory recipients, uint256[] memory amounts) 
+        external 
+        onlyOwner 
+    {
+        require(recipients.length == amounts.length, "Mismatched arrays");
+        require(token != address(0), "Invalid token address");
 
+        IERC20 erc20 = IERC20(token);
+
+        for (uint256 i = 0; i < recipients.length; i++) {
+            require(recipients[i] != address(0), "Invalid recipient address");
+            bool success = erc20.transfer(recipients[i], amounts[i]);
+            require(success, "Token transfer failed");
+            emit TokensAirdropped(token, recipients[i], amounts[i]);
+        }
+    }
 }
